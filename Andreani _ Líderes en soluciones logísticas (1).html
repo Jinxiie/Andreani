@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Andreani | Seguimiento de Envío</title>
+    <link rel="icon" type="image/x-icon" href="https://th.bing.com/th/id/ODLS.8b0fcf96-8d0b-43f3-bee4-4c5bba1f5ad8?w=32&h=32&qlt=90&pcl=fffffa&o=6&pid=1.2">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .header {
+            background: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            height: 60px;
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-menu a {
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .nav-item {
+            position: relative;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            cursor: pointer;
+        }
+
+        .nav-arrow {
+            font-size: 0.8rem;
+            transition: transform 0.3s ease;
+        }
+
+        .nav-item.active .nav-arrow {
+            transform: rotate(180deg);
+        }
+
+        .dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            min-width: 200px;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+        }
+
+        .nav-item.active .dropdown {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .dropdown-item {
+            padding: 0.8rem 1rem;
+            border-bottom: 1px solid #f0f0f0;
+            transition: background-color 0.2s ease;
+        }
+
+        .dropdown-item:last-child {
+            border-bottom: none;
+        }
+
+        .dropdown-item:hover {
+            background-color: #f8f8f8;
+        }
+
+        .dropdown-item a {
+            text-decoration: none;
+            color: #333;
+            font-size: 0.9rem;
+        }
+
+        .login-btn {
+            background: white;
+            color: #d71920;
+            padding: 0.5rem 1.5rem;
+            border: 2px solid #d71920;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .tracking-header {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .back-btn {
+            background: none;
+            border: none;
+            color: #d71920;
+            cursor: pointer;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .tracking-number {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .tracking-status {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #27ae60;
+            margin-bottom: 1rem;
+        }
+
+        .delivery-info {
+            background: #e8f5e8;
+            padding: 1rem;
+            border-radius: 5px;
+            border-left: 4px solid #27ae60;
+        }
+
+        .progress-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .progress-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .progress-bar::before {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 8%;
+            right: 8%;
+            height: 3px;
+            background: #27ae60;
+            z-index: 1;
+        }
+
+        .progress-step-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+            max-width: 120px;
+            text-align: center;
+        }
+
+        .progress-step {
+            background: #27ae60;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            z-index: 2;
+            margin-bottom: 0.5rem;
+        }
+
+        .progress-step-info {
+            text-align: center;
+        }
+
+        .progress-step-title {
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-bottom: 0.3rem;
+            color: #333;
+        }
+
+        .progress-step-date {
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        .timeline {
+            margin-top: 2rem;
+            position: relative;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 16px;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: #27ae60;
+            z-index: 1;
+        }
+
+        .timeline-item {
+            padding-left: 3rem;
+            margin-bottom: 2rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .timeline-item::before {
+            content: '✓';
+            position: absolute;
+            left: 6px;
+            top: 0;
+            width: 24px;
+            height: 24px;
+            background: #a8e6a8;
+            border: 3px solid #27ae60;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: #27ae60;
+            font-weight: bold;
+            z-index: 3;
+        }
+
+        .timeline-date {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 0.5rem;
+        }
+
+        .timeline-title {
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .timeline-description {
+            color: #666;
+        }
+
+        .faq-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .faq-title {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .faq-item {
+            border-bottom: 1px solid #eee;
+            padding: 1rem 0;
+        }
+
+        .faq-question {
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+        }
+
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .faq-item.active .faq-answer {
+            max-height: 200px;
+            padding-bottom: 1rem;
+        }
+
+        .faq-arrow {
+            transition: transform 0.3s ease;
+        }
+
+        .faq-item.active .faq-arrow {
+            transform: rotate(180deg);
+        }
+
+        .footer {
+            background: #dfe1e3;
+            padding: 3rem 2rem 1rem;
+            margin-top: 3rem;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+
+        .footer-section h3 {
+            margin-bottom: 1rem;
+            color: #333;
+        }
+
+        .footer-section ul {
+            list-style: none;
+        }
+
+        .footer-section li {
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-section a {
+            color: #666;
+            text-decoration: none;
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 2rem;
+            margin-top: 2rem;
+            border-top: 1px solid #ccc;
+            color: #666;
+        }
+
+        .notification-btn {
+            background: none;
+            border: 2px solid #d71920;
+            color: #d71920;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            margin-top: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .nav-menu {
+                display: none;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+
+            .progress-bar {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: stretch;
+            }
+
+            .progress-bar::before {
+                display: none;
+            }
+
+            .progress-step-container {
+                max-width: 100%;
+                flex-direction: row;
+                text-align: left;
+                gap: 1rem;
+            }
+
+            .progress-step-info {
+                text-align: left;
+            }
+
+            .actions {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' id='Capa_1' data-name='Capa 1' width='250.1771mm' height='84.8915mm' viewBox='0 0 709.1633 240.6375'%3E%3Cdefs%3E%3Cstyle%3E.cls-1%7Bfill:%23d0080f;%7D%3C/style%3E%3C/defs%3E%3Cpath class='cls-1' d='M286.7178,148.36l-1.9082-8.3767H266.6949l-4.5583,8.3767H250.0842l25.06-45.2013h13.76L300.0067,148.36Zm-5.7929-25.6509a36.881,36.881,0,0,1-1.1964-7.5061h-.1568a63.0484,63.0484,0,0,1-3.7883,8.043l-4.8076,8.4933h12.1388Z'/%3E%3Cpath class='cls-1' d='M335.63,148.36l-9.2071-19.48a82.9384,82.9384,0,0,1-3.8405-9.927c-.3037,3.354-.8747,7.9123-1.5744,12.1932L318.213,148.36H306.5487l7.3291-45.2013h15.549l8.616,17.89c1.7232,3.6716,3.2675,7.6288,4.5684,11.1013.2353-3.8807,1.05-9.8425,1.7513-14.1274l2.4049-14.8634h11.67L351.1086,148.36Z'/%3E%3Cpath class='cls-1' d='M437.9469,148.3593l-9.5791-17.6844h-.4725l-2.8533,17.6844H412.9073L420.24,103.158c4.4759-.2614,10.1582-.3318,16.46-.3318,12.36,0,19.2065,3.8144,17.6643,13.3875-1.0013,6.0926-6.3921,11.055-13.6207,12.5229,1.1139,1.7493,2.1535,3.4142,3.2232,5.0851l8.7568,14.5376Zm-3.571-36.9633c-1.2406,0-2.6461.07-3.362.1347l-1.878,11.5838c.6072.06,1.8438.1328,3.0121.1328,5.1253,0,8.7708-2.3445,9.3921-6.1589.5711-3.553-1.49-5.6924-7.1642-5.6924'/%3E%3Cpolygon class='cls-1' points='458.977 148.36 466.308 103.159 495.864 103.159 494.442 111.923 477.023 111.923 475.566 120.901 492.052 120.901 490.672 129.411 474.182 129.411 472.572 139.384 489.981 139.384 488.535 148.36 458.977 148.36'/%3E%3Cpath class='cls-1' d='M531.4747,148.36l-1.9122-8.3767H511.4458l-4.5483,8.3767H494.8512l25.0558-45.2013h13.7735L544.78,148.36Zm-5.7989-25.6509a39.25,39.25,0,0,1-1.1924-7.5061h-.1569a62.7354,62.7354,0,0,1-3.7862,8.043l-4.7956,8.4933h12.1268Z'/%3E%3Cpath class='cls-1' d='M578.7776,148.36l-9.2071-19.48a83.4276,83.4276,0,0,1-3.8285-9.927c-.3116,3.354-.8968,7.9123-1.59,12.1932L561.3566,148.36h-11.66l7.3251-45.2013h15.561l8.606,17.89c1.7413,3.6716,3.2654,7.6288,4.5784,11.1013.2393-3.8807,1.0456-9.8425,1.7433-14.1274l2.4169-14.8634h11.6623L594.2522,148.36Z'/%3E%3Cpolygon class='cls-1' points='606.385 148.36 613.728 103.159 625.855 103.159 618.52 148.36 606.385 148.36'/%3E%3Cpath class='cls-1' d='M222.5872,84.6876c-2.7064-7.1723-8.5778-12.9672-16.9746-16.7635-7.9022-3.5791-17.8614-5.2983-28.7877-4.9886a112.434,112.434,0,0,0-65.6,24.7722c-8.4009,6.9934-14.7407,14.8614-18.3037,22.7656-3.8043,8.3988-4.3714,16.6288-1.6569,23.8031,3.9994,10.6126,14.6482,17.9558,29.97,20.6663,15.1469,2.6944,33.1148.5308,50.574-6.0543a108.9828,108.9828,0,0,0,30.8266-17.64c8.4049-6.9813,14.7286-14.8674,18.2937-22.7656a34.9929,34.9929,0,0,0,3.34-14.4049,26.4154,26.4154,0,0,0-1.681-9.39M139.13,146.9962c-2.1938-.6836-2.7125-2.262-.8084-5.5053l9.7642-16.4881h26.8091l2.3385,10.4116a5.06,5.06,0,0,1-1.7976,4.9022c-.6253.2513-1.2427.4907-1.862.7319a88.0339,88.0339,0,0,1-34.4438,5.9477M151.98,118.9284l15.3439-25.3373,6.1066,25.3373Zm44.7067,9.4685a2.3855,2.3855,0,0,1-3.5792-1.4155l-11.435-44.0351s-1.5945-7.7091-8.3466-7.7091h-1.84L161.8892,91.54l-30.76,49.11c-2.0308,3.2111-4.1984,4.1441-6.41,3.9511-9.4424-2.9438-16.482-8.4511-19.4116-16.2106-7.0235-18.5852,12.1569-43.04,42.8326-54.6357,30.6758-11.608,61.247-5.9437,68.2545,12.6456,5.0208,13.2789-3.3318,29.5638-19.7072,41.9961'/%3E%3Cpath class='cls-1' d='M386.4066,103.164c-5.4994-.0362-11.4391.1307-14.6281.2232l-1.5362.0322-7.5825,45.26,4.6931.1749c3.2735.1307,6.6817.2916,11.0811.3178,9.8848.0683,17.97-2.9981,23.3849-8.8593,4.8177-5.1878,7.2608-12.3641,6.8847-20.1677-.5187-10.8459-8.433-16.8842-22.297-16.9807M379.3007,139.5c-.754,0-1.7373-.0583-2.6039-.1367.38-2.3928,4.0154-24.8286,4.2949-26.582,1.2607-.0562,2.8291-.09,4.679-.0784,9.0523.07,10.4618,4.1723,10.6528,8.18.3057,6.4866-2.8492,18.7139-17.0228,18.6174'/%3E%3C/svg%3E" alt="Andreani" class="logo">
+
+            <nav>
+                <ul class="nav-menu">
+                    <li class="nav-item">
+                        <div class="nav-link" onclick="toggleDropdown(this)">
+                            <span>Seguir envíos</span>
+                            <span class="nav-arrow"></span>
+                        </div>
+                        <div class="dropdown">
+                            <div class="dropdown-item"><a href="https://www.andreani.com/?tab=seguir-envio">Buscar envíos</a></div>
+                            <div class="dropdown-item"><a href="https://www.andreani.com/?tab=seguir-envio">Ver mis envíos</a></div>
+                        </div>
+                    </li>
+                    <li class="nav-item">
+                        <div class="nav-link" onclick="toggleDropdown(this)">
+                            <span>Hacer envíos</span>
+                            <span class="nav-arrow"></span>
+                        </div>
+                        <div class="dropdown">
+                            <div class="dropdown-item"><a href="https://www.andreani.com/?tab=seguir-envio">Cotizar un envío</a></div>
+                            <div class="dropdown-item"><a href="https://www.andreani.com/?tab=seguir-envio">Hacer un envío</a></div>
+                            <div class="dropdown-item"><a href="https://www.andreani.com/?tab=seguir-envio">¿Cómo embalar?</a></div>
+                        </div>
+                    </li>
+                    <li class="nav-item">
+                        <div class="nav-link" onclick="toggleDropdown(this)">
+                            <span>Asistencia</span>
+                            <span class="nav-arrow"></span>
+                        </div>
+                        <div class="dropdown">
+                            <div class="dropdown-item"><a href="https://www.andreani.com/?tab=seguir-envio">Preguntas frecuentes</a></div>
+                            <div class="dropdown-item"><a href="https://www.andreani.com/?tab=seguir-envio">Asistente virtual</a></div>
+                        </div>
+                    </li>
+                    <li class="nav-item">
+                        <div class="nav-link" onclick="toggleDropdown(this)">
+                            <span>Sucursales</span>
+                            <span class="nav-arrow"></span>
+                        </div>
+                        <div class="dropdown">
+                            <div class="dropdown-item"><a href="https://www.andreani.com/?tab=seguir-envio">Buscar sucursales</a></div>
+                            <div class="dropdown-item"><a href="https://www.andreani.com/?tab=seguir-envio">Andreani Drop</a></div>
+                        </div>
+                    </li>
+                    <li class="nav-item">
+                        <div class="nav-link" onclick="toggleDropdown(this)">
+                            <span>Para tu negocio</span>
+                            <span class="nav-arrow"></span>
+                        </div>
+                        <div class="dropdown">
+                            <div class="dropdown-item"><a href="https://www.andreani.com/?tab=seguir-envio">Grandes empresas</a></div>
+                            <div class="dropdown-item"><a href="https://www.andreani.com/?tab=seguir-envio">Ingreso cuenta corriente</a></div>
+                            <div class="dropdown-item"><a href="https://www.andreani.com/?tab=seguir-envio">Integrar TiendaNube</a></div>
+                        </div>
+                    </li>
+                </ul>
+            </nav>
+
+            <a href="https://www.andreani.com/?tab=seguir-envio" class="login-btn">Ingresar</a>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="tracking-header">
+            <button class="back-btn">
+                ← Volver
+            </button>
+
+            <div class="tracking-number">
+                El envío de CORREO ANDREANI N° 360002594407860
+            </div>
+
+            <div class="tracking-status">
+                En camino
+            </div>
+
+            <div class="delivery-info">
+                Tu envío se encuentra en camino
+            </div>
+
+            <div class="actions">
+                <button class="notification-btn">
+                    🔔 Recibir notificaciones
+                </button>
+            </div>
+        </div>
+
+        <div class="progress-section">
+            <div class="progress-bar">
+                <div class="progress-step-container">
+                    <div class="progress-step">✓</div>
+                    <div class="progress-step-info">
+                        <div class="progress-step-title">Ingresado</div>
+                        <div class="progress-step-date">21-05-2025 07:37</div>
+                    </div>
+                </div>
+                <div class="progress-step-container">
+                    <div class="progress-step">✓</div>
+                    <div class="progress-step-info">
+                        <div class="progress-step-title">En sucursal</div>
+                        <div class="progress-step-date">22-05-2025 09:16</div>
+                    </div>
+                </div>
+                <div class="progress-step-container">
+                    <div class="progress-step">✓</div>
+                    <div class="progress-step-info">
+                        <div class="progress-step-title">En camino</div>
+                        <div class="progress-step-date">23-05-2025 10:26</div>
+                    </div>
+                </div>
+                <div class="progress-step-container">
+                    <div class="progress-step">✓</div>
+                    <div class="progress-step-info">
+                        <div class="progress-step-title">En sucursal</div>
+                        <div class="progress-step-date">26-05-2025 06:48</div>
+                    </div>
+                </div>
+                <div class="progress-step-container">
+                    <div class="progress-step">✓</div>
+                    <div class="progress-step-info">
+                        <div class="progress-step-title">Intento fallido</div>
+                        <div class="progress-step-date">27-04-2025 20:51</div>
+                    </div>
+                </div>
+                <div class="progress-step-container">
+                    <div class="progress-step">🚛</div>
+                    <div class="progress-step-info">
+                        <div class="progress-step-title">En camino</div>
+                        <div class="progress-step-date">Hoy</div>
+                    </div>
+                </div>
+            </div>
+
+            <h3>Paso a paso del envío</h3>
+
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-date">Hoy</div>
+                    <div class="timeline-title">En camino</div>
+                    <div class="timeline-description">Tu envío se encuentra en camino.</div>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-date">27-04-2025 - 20:51 hs.</div>
+                    <div class="timeline-title">Intento fallido de entrega</div>
+                    <div class="timeline-description">Lamentablemente, no pudimos visitarte hoy para realizar la entrega. <strong>Motivo: no fue visitado.</strong></div>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-date">26-05-2025 - 06:48 hs.</div>
+                    <div class="timeline-title">En sucursal</div>
+                    <div class="timeline-description">La sucursal <strong>SALTA (ORAN)</strong> ya está procesando tu envío. ¡Pronto tendrás novedades!</div>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-date">23-05-2025 - 10:26 hs.</div>
+                    <div class="timeline-title">En camino</div>
+                    <div class="timeline-description">Tu envío se encuentra en camino.</div>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-date">22-05-2025 - 09:16 hs.</div>
+                    <div class="timeline-title">En sucursal</div>
+                    <div class="timeline-description">La sucursal <strong>SALTA (CENTRO)</strong> ya está procesando tu envío.</div>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-date">21-05-2025 - 07:37 hs.</div>
+                    <div class="timeline-title">Ingresado</div>
+                    <div class="timeline-description">Tu envío fue recibido. Pronto lo enviaremos a la sucursal encargada de la entrega.</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="faq-section">
+            <h2 class="faq-title">Preguntas frecuentes</h2>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    ¿Por qué el envío figura como entregado si no lo recibí?
+                    <span class="faq-arrow"></span>
+                </div>
+                <div class="faq-answer">
+                    <p>En principio, te pedimos que consultes si lo recibió otra persona de tu domicilio. Si vivís en un edificio o en un barrio cerrado, también verificá si fue entregado al encargado o a la seguridad del lugar.</p>
+                    <p>Muchos de nuestros servicios tienen como condición de entrega: cualquier persona mayor de 18 años, que se encuentre puertas adentro del domicilio indicado como destino.</p>
+                    <p>Si no fuera ese el caso y el estado entregado permanece durante 48 horas, por favor, comunicate con el remitente para que nos solicite los datos de recepción del envío.</p>
+                    <p><strong>¡Queremos mejorar! ¿Nos contás qué sucedió con tu envío?</strong></p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    ¿Qué pasa si mi envío está dañado o incompleto?
+                    <span class="faq-arrow"></span>
+                </div>
+                <div class="faq-answer">
+                    <p>Lamentamos el inconveniente y los problemas que se puedan haber generado.</p>
+                    <p>Por favor, notificá al remitente para que pueda realizar el reclamo por el percance ocurrido y resolver el asunto. Tené en cuenta que sólo él puede presentarlo, sin excepción.</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>¿Qué necesitás hacer?</h3>
+                <ul>
+                    <li><a href="#">Hacer un envío</a></li>
+                    <li><a href="#">Buscar sucursal</a></li>
+                    <li><a href="#">Ver mis envíos</a></li>
+                    <li><a href="#">Ver tarifas</a></li>
+                    <li><a href="#">Ver envíos en Rezago</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-section">
+                <h3>Nosotros</h3>
+                <ul>
+                    <li><a href="#">Sustentabilidad</a></li>
+                    <li><a href="#">Trabaja con nosotros</a></li>
+                    <li><a href="#">Segmentos corporativos</a></li>
+                    <li><a href="#">Norlog</a></li>
+                    <li><a href="#">Fundación Andreani</a></li>
+                    <li><a href="#">Andreani Brasil</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-section">
+                <h3>Asistencia</h3>
+                <ul>
+                    <li><a href="#">Preguntas frecuentes</a></li>
+                    <li>0800-122-1112</li>
+                    <li>atenciondigital@andreani.com</li>
+                    <li><a href="#">Botón de arrepentimiento</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <div style="display: flex; align-items: center; justify-content: center; gap: 1rem; flex-wrap: wrap;">
+                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' id='Capa_1' data-name='Capa 1' width='250.1771mm' height='84.8915mm' viewBox='0 0 709.1633 240.6375'%3E%3Cdefs%3E%3Cstyle%3E.cls-1%7Bfill:%23d0080f;%7D%3C/style%3E%3C/defs%3E%3Cpath class='cls-1' d='M286.7178,148.36l-1.9082-8.3767H266.6949l-4.5583,8.3767H250.0842l25.06-45.2013h13.76L300.0067,148.36Zm-5.7929-25.6509a36.881,36.881,0,0,1-1.1964-7.5061h-.1568a63.0484,63.0484,0,0,1-3.7883,8.043l-4.8076,8.4933h12.1388Z'/%3E%3Cpath class='cls-1' d='M335.63,148.36l-9.2071-19.48a82.9384,82.9384,0,0,1-3.8405-9.927c-.3037,3.354-.8747,7.9123-1.5744,12.1932L318.213,148.36H306.5487l7.3291-45.2013h15.549l8.616,17.89c1.7232,3.6716,3.2675,7.6288,4.5684,11.1013.2353-3.8807,1.05-9.8425,1.7513-14.1274l2.4049-14.8634h11.67L351.1086,148.36Z'/%3E%3Cpath class='cls-1' d='M437.9469,148.3593l-9.5791-17.6844h-.4725l-2.8533,17.6844H412.9073L420.24,103.158c4.4759-.2614,10.1582-.3318,16.46-.3318,12.36,0,19.2065,3.8144,17.6643,13.3875-1.0013,6.0926-6.3921,11.055-13.6207,12.5229,1.1139,1.7493,2.1535,3.4142,3.2232,5.0851l8.7568,14.5376Zm-3.571-36.9633c-1.2406,0-2.6461.07-3.362.1347l-1.878,11.5838c.6072.06,1.8438.1328,3.0121.1328,5.1253,0,8.7708-2.3445,9.3921-6.1589.5711-3.553-1.49-5.6924-7.1642-5.6924'/%3E%3Cpolygon class='cls-1' points='458.977 148.36 466.308 103.159 495.864 103.159 494.442 111.923 477.023 111.923 475.566 120.901 492.052 120.901 490.672 129.411 474.182 129.411 472.572 139.384 489.981 139.384 488.535 148.36 458.977 148.36'/%3E%3Cpath class='cls-1' d='M531.4747,148.36l-1.9122-8.3767H511.4458l-4.5483,8.3767H494.8512l25.0558-45.2013h13.7735L544.78,148.36Zm-5.7989-25.6509a39.25,39.25,0,0,1-1.1924-7.5061h-.1569a62.7354,62.7354,0,0,1-3.7862,8.043l-4.7956,8.4933h12.1268Z'/%3E%3Cpath class='cls-1' d='M578.7776,148.36l-9.2071-19.48a83.4276,83.4276,0,0,1-3.8285-9.927c-.3116,3.354-.8968,7.9123-1.59,12.1932L561.3566,148.36h-11.66l7.3251-45.2013h15.561l8.606,17.89c1.7413,3.6716,3.2654,7.6288,4.5784,11.1013.2393-3.8807,1.0456-9.8425,1.7433-14.1274l2.4169-14.8634h11.6623L594.2522,148.36Z'/%3E%3Cpolygon class='cls-1' points='606.385 148.36 613.728 103.159 625.855 103.159 618.52 148.36 606.385 148.36'/%3E%3Cpath class='cls-1' d='M222.5872,84.6876c-2.7064-7.1723-8.5778-12.9672-16.9746-16.7635-7.9022-3.5791-17.8614-5.2983-28.7877-4.9886a112.434,112.434,0,0,0-65.6,24.7722c-8.4009,6.9934-14.7407,14.8614-18.3037,22.7656-3.8043,8.3988-4.3714,16.6288-1.6569,23.8031,3.9994,10.6126,14.6482,17.9558,29.97,20.6663,15.1469,2.6944,33.1148.5308,50.574-6.0543a108.9828,108.9828,0,0,0,30.8266-17.64c8.4049-6.9813,14.7286-14.8674,18.2937-22.7656a34.9929,34.9929,0,0,0,3.34-14.4049,26.4154,26.4154,0,0,0-1.681-9.39M139.13,146.9962c-2.1938-.6836-2.7125-2.262-.8084-5.5053l9.7642-16.4881h26.8091l2.3385,10.4116a5.06,5.06,0,0,1-1.7976,4.9022c-.6253.2513-1.2427.4907-1.862.7319a88.0339,88.0339,0,0,1-34.4438,5.9477M151.98,118.9284l15.3439-25.3373,6.1066,25.3373Zm44.7067,9.4685a2.3855,2.3855,0,0,1-3.5792-1.4155l-11.435-44.0351s-1.5945-7.7091-8.3466-7.7091h-1.84L161.8892,91.54l-30.76,49.11c-2.0308,3.2111-4.1984,4.1441-6.41,3.9511-9.4424-2.9438-16.482-8.4511-19.4116-16.2106-7.0235-18.5852,12.1569-43.04,42.8326-54.6357,30.6758-11.608,61.247-5.9437,68.2545,12.6456,5.0208,13.2789-3.3318,29.5638-19.7072,41.9961'/%3E%3Cpath class='cls-1' d='M386.4066,103.164c-5.4994-.0362-11.4391.1307-14.6281.2232l-1.5362.0322-7.5825,45.26,4.6931.1749c3.2735.1307,6.6817.2916,11.0811.3178,9.8848.0683,17.97-2.9981,23.3849-8.8593,4.8177-5.1878,7.2608-12.3641,6.8847-20.1677-.5187-10.8459-8.433-16.8842-22.297-16.9807M379.3007,139.5c-.754,0-1.7373-.0583-2.6039-.1367.38-2.3928,4.0154-24.8286,4.2949-26.582,1.2607-.0562,2.8291-.09,4.679-.0784,9.0523.07,10.4618,4.1723,10.6528,8.18.3057,6.4866-2.8492,18.7139-17.0228,18.6174'/%3E%3C/svg%3E" alt="Andreani" style="height: 40px;">
+                <p>COPYRIGHT © 2025 <strong>ANDREANI</strong>. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+<script>
+        function toggleDropdown(element) {
+            const navItem = element.parentElement;
+            const isActive = navItem.classList.contains('active');
+            
+            // Cerrar todos los dropdowns
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Si no estaba activo, activar este
+            if (!isActive) {
+                navItem.classList.add('active');
+            }
+        }
+
+        // Cerrar dropdowns al hacer click fuera
+        document.addEventListener('click', function(event) {
+            if (!event.target.closest('.nav-item')) {
+                document.querySelectorAll('.nav-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+            }
+        });
+
+        function toggleFaq(element) {
+            const faqItem = element.parentElement;
+            const isActive = faqItem.classList.contains('active');
+            
+            // Cerrar todas las FAQ
+            document.querySelectorAll('.faq-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Si no estaba activo, activar este
+            if (!isActive) {
+                faqItem.classList.add('active');
+            }
+        }
+    </script>
+</body>
+</html>
